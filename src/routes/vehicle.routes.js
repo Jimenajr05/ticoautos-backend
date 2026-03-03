@@ -11,6 +11,9 @@ router.post("/", authMiddleware, vehicleController.createVehicle);
 //PUT Vehiculo
 router.put("/:id", authMiddleware, vehicleController.updateVehicle);
 
+//GET públicO 
+router.get("/:id", vehicleController.getVehicleById);
+
 // Delete Vehiculo
 router.delete("/:id", authMiddleware, vehicleController.deleteVehicle);
 

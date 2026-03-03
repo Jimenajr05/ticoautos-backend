@@ -6,7 +6,7 @@ exports.createVehicle = async (req, res) => {
 
     if (!title || !brand || !model || !year || !price) {
       return res.status(400).json({
-        message: "All required fields must be completed",
+        message: "Todos los ewspacios debe de llenarse",
       });
     }
 
@@ -23,12 +23,12 @@ exports.createVehicle = async (req, res) => {
     await newVehicle.save();
 
     res.status(201).json({
-      message: "Vehicle created successfully",
+      message: "El vehiculo se a creado correctamente",
       vehicle: newVehicle,
     });
   } catch (error) {
     res.status(500).json({
-      message: "Error creating vehicle",
+      message: "Error al crear vehiculo",
       error: error.message,
     });
   }
@@ -41,11 +41,11 @@ exports.updateVehicle = async (req, res) => {
     const vehicle = await Vehicle.findById(id);
 
     if (!vehicle) {
-      return res.status(404).json({ message: "Vehicle not found" });
+      return res.status(404).json({ message: "Vehículo no encontrado" });
     }
 
     if (vehicle.user.toString() !== req.user.id) {
-      return res.status(403).json({ message: "Not authorized" });
+      return res.status(403).json({ message: "No autorizado" });
     }
 
     const updatedVehicle = await Vehicle.findByIdAndUpdate(
@@ -55,12 +55,40 @@ exports.updateVehicle = async (req, res) => {
     );
 
     res.status(200).json({
-      message: "Vehicle updated successfully",
+      message: "El vehiculo se actualizo correctamente",
       vehicle: updatedVehicle,
     });
   } catch (error) {
     res.status(500).json({
       message: "Error updating vehicle",
+      error: error.message,
+    });
+  }
+};
+
+exports.getVehicleById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const vehicle = await Vehicle.findById(id)
+      .populate("user", "name");               // Solo trae el nombre del propietario
+
+    if (!vehicle) {
+      return res.status(404).json({
+        success: false,
+        message: "Vehículo no encontrado",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: vehicle,
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error al obtener el vehículo",
       error: error.message,
     });
   }
@@ -73,21 +101,21 @@ exports.deleteVehicle = async (req, res) => {
     const vehicle = await Vehicle.findById(id);
 
     if (!vehicle) {
-      return res.status(404).json({ message: "Vehicle not found" });
+      return res.status(404).json({ message: "Vehículo no encontrado" });
     }
 
     if (vehicle.user.toString() !== req.user.id) {
-      return res.status(403).json({ message: "Not authorized" });
+      return res.status(403).json({ message: "No autorizado" });
     }
 
     await Vehicle.findByIdAndDelete(id);
 
     res.status(200).json({
-      message: "Vehicle deleted successfully",
+      message: "Se elimino el vehiculo correctamente",
     });
   } catch (error) {
     res.status(500).json({
-      message: "Error deleting vehicle",
+      message: "Error al obtener el vehículo",
       error: error.message,
     });
   }
@@ -105,20 +133,20 @@ exports.markAsSold = async (req, res) => {
     }
 
     if (vehicle.user.toString() !== req.user.id) {
-      return res.status(403).json({ message: "Not authorized" });
+      return res.status(403).json({ message: "No autorizado" });
     }
 
     vehicle.status = "sold";
     await vehicle.save();
 
     res.status(200).json({
-      message: "Vehicle marked as sold",
+      message: "Vehículo marcado como vendido",
       vehicle,
     });
 
   } catch (error) {
     res.status(500).json({
-      message: "Error updating vehicle status",
+      message: "Error al obtener el vehículo",
       error: error.message,
     });
   }
