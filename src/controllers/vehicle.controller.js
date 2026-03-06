@@ -151,3 +151,73 @@ exports.markAsSold = async (req, res) => {
     });
   }
 };
+
+exports.getVehicles = async (req, res) => {
+  try {
+
+    const {
+      brand,
+      model,
+      minYear,
+      maxYear,
+      minPrice,
+      maxPrice,
+      status,
+      page = 1,
+      limit = 10
+    } = req.query;
+
+    let filters = {};
+
+    //Filtro por marca
+    if (brand) {
+      filters.brand = brand;
+    }
+
+    //Filtro por modelo
+    if (model) {
+      filters.model = model;
+    }
+
+    //Filtro por estado
+    if (status) {
+      filters.status = status;
+    }
+
+    //Filtro por rango de año
+    if (minYear || maxYear) {
+      filters.year = {};
+      if (minYear) filters.year.$gte = Number(minYear);
+      if (maxYear) filters.year.$lte = Number(maxYear);
+    }
+
+    //Filtro por rango de precio
+    if (minPrice || maxPrice) {
+      filters.price = {};
+      if (minPrice) filters.price.$gte = Number(minPrice);
+      if (maxPrice) filters.price.$lte = Number(maxPrice);
+    }
+
+    //Paginación
+    const skip = (page - 1) * limit;
+
+    const vehicles = await Vehicle.find(filters)
+      .skip(skip)
+      .limit(Number(limit));
+
+    const total = await Vehicle.countDocuments(filters);
+
+    res.status(200).json({
+      totalVehicles: total,
+      currentPage: Number(page),
+      totalPages: Math.ceil(total / limit),
+      data: vehicles
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message: "Error al obtener los vehículos",
+      error: error.message
+    });
+  }
+};
