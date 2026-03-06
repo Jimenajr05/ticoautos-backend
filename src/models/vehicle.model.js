@@ -40,10 +40,9 @@ const vehicleSchema = new mongoose.Schema(
 
     user: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "User",       //La relacion que va a tener con el usuario
       required: true,
     },
-    
   },
   {
     timestamps: true,
@@ -51,4 +50,3 @@ const vehicleSchema = new mongoose.Schema(
 );
 
 module.exports = mongoose.model("Vehicle", vehicleSchema);
-
