@@ -1,4 +1,5 @@
 const User = require('../models/user');
+const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 const login = async (req, res) => {
@@ -13,7 +14,7 @@ const login = async (req, res) => {
     }
 
     try {
-        const user = await User.findOne({ email: email.toLowerCase().trim() });
+        const user = await User.findOne({ email: email.toLowerCase().trim() }).select('+password');
         if (!user) {
             return res.status(401).json({ message: 'Invalid email or password' });
         }
