@@ -29,13 +29,16 @@ const register = async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
+        const profileImage = req.file ? `/${req.file.path.replace(/\\/g, '/')}` : null;
+
         const user = await User.create({
             name: name.trim(),
             lastName: lastName.trim(),
             age,
             phone: phone.trim(),
             email: email.toLowerCase().trim(),
-            password: hashedPassword
+            password: hashedPassword,
+            profileImage
         });
 
         const token = jwt.sign(
@@ -53,7 +56,8 @@ const register = async (req, res) => {
                 lastName: user.lastName,
                 age: user.age,
                 phone: user.phone,
-                email: user.email
+                email: user.email,
+                profileImage: user.profileImage
             }
         });
     } catch (error) {
