@@ -38,6 +38,11 @@ const vehicleSchema = new mongoose.Schema(
       default: "available",
     },
 
+    vehicleImage: {
+      type: [String],
+      default: []
+    },
+
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",       //La relacion que va a tener con el usuario
