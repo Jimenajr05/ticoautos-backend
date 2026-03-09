@@ -1,10 +1,10 @@
 const express = require("express");
 const router = express.Router();
 
-const authenticateToken = require("../middlewares/authMiddleware");
 const vehicleController = require("../controllers/vehicle.controller");
 const authMiddleware = require("../middlewares/authMiddleware");
- 
+const upload = require("../middlewares/uploadMiddleware");
+
 //Lista de vehículos con filtros
 router.get("/", vehicleController.getVehicles);
 
@@ -12,10 +12,10 @@ router.get("/", vehicleController.getVehicles);
 router.get("/:id", vehicleController.getVehicleById);
 
 //POST Vehiculo
-router.post("/", authMiddleware, vehicleController.createVehicle);
+router.post("/", authMiddleware, upload.array("vehicleImage", 5), vehicleController.createVehicle);
 
 //PUT Vehiculo
-router.put("/:id", authMiddleware, vehicleController.updateVehicle);
+router.put("/:id", authMiddleware, upload.array("vehicleImage", 5), vehicleController.updateVehicle);
 
 // Delete Vehiculo
 router.delete("/:id", authMiddleware, vehicleController.deleteVehicle);
