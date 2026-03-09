@@ -39,7 +39,8 @@ const login = async (req, res) => {
             lastName: user.lastName,
             age: user.age,
             phone: user.phone,
-            email: user.email
+            email: user.email,
+            profileImage: user.profileImage
           }
         });
     } catch (error) {
