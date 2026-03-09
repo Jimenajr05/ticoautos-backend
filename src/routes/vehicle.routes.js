@@ -23,4 +23,7 @@ router.delete("/:id", authMiddleware, vehicleController.deleteVehicle);
 //Marca el auto como vendido
 router.patch("/:id/sold", authMiddleware, vehicleController.markAsSold);
 
+//Generación de enlace  
+router.get("/:id/share", vehicleController.getVehicleShareLink);
+
 module.exports = router;

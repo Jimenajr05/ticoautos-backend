@@ -221,3 +221,32 @@ exports.getVehicles = async (req, res) => {
     });
   }
 };
+
+exports.getVehicleShareLink = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const vehicle = await Vehicle.findById(id);
+
+    if (!vehicle) {
+      return res.status(404).json({ 
+        success: false,
+        message: "Vehículo no encontrado" });
+    }
+    const shareURL = ${process.env.FRONTEND_URL}/vehicles/${id};
+
+    res.status(200).json({
+      success: true,
+      message: "Enlace de vehículo generado correctamente",
+      data: {
+        vehicleId: vehicle._id,
+        shareURL,
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error al generar el enlace del vehículo",
+      error: error.message,
+    });
+  }
+};
