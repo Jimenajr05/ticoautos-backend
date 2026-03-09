@@ -6,7 +6,7 @@ exports.createVehicle = async (req, res) => {
 
     if (!title || !brand || !model || !year || !price) {
       return res.status(400).json({
-        message: "Todos los ewspacios debe de llenarse",
+        message: "Todos los espacios debe de llenarse",
       });
     }
 
