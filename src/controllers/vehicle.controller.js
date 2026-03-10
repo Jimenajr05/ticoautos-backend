@@ -10,6 +10,8 @@ exports.createVehicle = async (req, res) => {
       });
     }
 
+    const vehicleImage = req.files ? req.files.map((file) => `/${file.path.replace(/\\/g, '/')}`) : [];
+
     const newVehicle = new Vehicle({
       title,
       brand,
@@ -17,6 +19,7 @@ exports.createVehicle = async (req, res) => {
       year,
       price,
       description,
+      vehicleImage,
       user: req.user.id, 
     });
 
@@ -48,6 +51,10 @@ exports.updateVehicle = async (req, res) => {
       return res.status(403).json({ message: "No autorizado" });
     }
 
+    if (req.files && req.files.length > 0) {
+      req.body.vehicleImage = req.files.map((file) => `/${file.path.replace(/\\/g, '/')}`);
+    }
+
     const updatedVehicle = await Vehicle.findByIdAndUpdate(
       id,
       req.body,
@@ -71,7 +78,7 @@ exports.getVehicleById = async (req, res) => {
     const { id } = req.params;
 
     const vehicle = await Vehicle.findById(id)
-      .populate("user", "name");               // Solo trae el nombre del propietario
+      .populate("user", "name lastName profileImage");               // Solo trae el nombre del propietario
 
     if (!vehicle) {
       return res.status(404).json({
@@ -121,7 +128,6 @@ exports.deleteVehicle = async (req, res) => {
   }
 };
 
- 
 exports.markAsSold = async (req, res) => {
   try {
     const { id } = req.params;
@@ -202,6 +208,7 @@ exports.getVehicles = async (req, res) => {
     const skip = (page - 1) * limit;
 
     const vehicles = await Vehicle.find(filters)
+      .populate("user", "name lastName profileImage") // Trae el nombre del propietario
       .skip(skip)
       .limit(Number(limit));
 
