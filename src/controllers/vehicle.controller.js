@@ -46,11 +46,15 @@ exports.updateVehicle = async (req, res) => {
     const vehicle = await Vehicle.findById(id);
 
     if (!vehicle) {
-      return res.status(404).json({ message: "Vehículo no encontrado" });
+      return res.status(404).json({
+        message: "Vehículo no encontrado",
+      });
     }
 
     if (vehicle.user.toString() !== req.user.id) {
-      return res.status(403).json({ message: "No autorizado" });
+      return res.status(403).json({
+        message: "No autorizado",
+      });
     }
 
     if (req.files && req.files.length > 0) {
@@ -80,8 +84,10 @@ exports.getVehicleById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const vehicle = await Vehicle.findById(id).populate     //Solo trae el nombre del propietario
-    ("user","name lastName profileImage");
+    const vehicle = await Vehicle.findById(id).populate(
+      "user",
+      "name lastName profileImage"
+    );
 
     if (!vehicle) {
       return res.status(404).json({
@@ -110,11 +116,15 @@ exports.deleteVehicle = async (req, res) => {
     const vehicle = await Vehicle.findById(id);
 
     if (!vehicle) {
-      return res.status(404).json({ message: "Vehículo no encontrado" });
+      return res.status(404).json({
+        message: "Vehículo no encontrado",
+      });
     }
 
     if (vehicle.user.toString() !== req.user.id) {
-      return res.status(403).json({ message: "No autorizado" });
+      return res.status(403).json({
+        message: "No autorizado",
+      });
     }
 
     await Vehicle.findByIdAndDelete(id);
@@ -137,11 +147,15 @@ exports.markAsSold = async (req, res) => {
     const vehicle = await Vehicle.findById(id);
 
     if (!vehicle) {
-      return res.status(404).json({ message: "Vehículo no encontrado" });
+      return res.status(404).json({
+        message: "Vehículo no encontrado",
+      });
     }
 
     if (vehicle.user.toString() !== req.user.id) {
-      return res.status(403).json({ message: "No autorizado" });
+      return res.status(403).json({
+        message: "No autorizado",
+      });
     }
 
     vehicle.status = "sold";
@@ -173,18 +187,24 @@ exports.getVehicles = async (req, res) => {
       limit = 10,
     } = req.query;
 
-    let filters = {};
+    const filters = {};
 
-    if (brand) {
-      filters.brand = brand;
+    if (brand && brand.trim() !== "") {
+      filters.brand = {
+        $regex: `^${brand.trim()}`,
+        $options: "i",
+      };
     }
 
-    if (model) {
-      filters.model = model;
+    if (model && model.trim() !== "") {
+      filters.model = {
+        $regex: model.trim(),
+        $options: "i",
+      };
     }
 
-    if (status) {
-      filters.status = status;
+    if (status && status.trim() !== "") {
+      filters.status = status.trim();
     }
 
     if (minYear || maxYear) {
@@ -199,19 +219,21 @@ exports.getVehicles = async (req, res) => {
       if (maxPrice) filters.price.$lte = Number(maxPrice);
     }
 
-    const skip = (Number(page) - 1) * Number(limit);
+    const pageNumber = Number(page);
+    const limitNumber = Number(limit);
+    const skip = (pageNumber - 1) * limitNumber;
 
     const vehicles = await Vehicle.find(filters)
       .populate("user", "name lastName profileImage")
       .skip(skip)
-      .limit(Number(limit));
+      .limit(limitNumber);
 
     const total = await Vehicle.countDocuments(filters);
 
     res.status(200).json({
       totalVehicles: total,
-      currentPage: Number(page),
-      totalPages: Math.ceil(total / Number(limit)),
+      currentPage: pageNumber,
+      totalPages: Math.ceil(total / limitNumber),
       data: vehicles,
     });
   } catch (error) {
@@ -243,7 +265,7 @@ exports.getMyVehicles = async (req, res) => {
 exports.getVehicleShareLink = async (req, res) => {
   try {
     const { id } = req.params;
-    const vehicle = await Vehicle.findById(id);   
+    const vehicle = await Vehicle.findById(id);
 
     if (!vehicle) {
       return res.status(404).json({
