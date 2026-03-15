@@ -6,56 +6,42 @@ exports.askQuestion = async (req, res) => {
     const { vehicleId, question } = req.body;
 
     if (!question || !question.trim()) {
-      return res.status(400).json({
-        message: "La pregunta es obligatoria",
-      });
+      return res.status(400).json({ message: "La pregunta es obligatoria" });
     }
 
     const vehicle = await Vehicle.findById(vehicleId);
-
     if (!vehicle) {
-      return res.status(404).json({
-        message: "Vehículo no encontrado",
-      });
+      return res.status(404).json({ message: "Vehículo no encontrado" });
     }
 
-    // No permitir preguntar en su propio vehículo
-    if (vehicle.user.toString() === req.user.id) {
-      return res.status(400).json({
-        message: "No puedes enviar preguntas a tu propio vehículo",
-      });
+    if (vehicle.user.toString() === req.user._id.toString()) {
+      return res.status(400).json({ message: "No puedes preguntar por tu propio vehículo" });
     }
 
-    // Validar que no tenga una pregunta pendiente
-    const lastQuestion = await Question.findOne({
+    const pendingQuestion = await Question.findOne({
       vehicle: vehicleId,
-      askedBy: req.user.id,
-    }).sort({ createdAt: -1 });
-
-    if (lastQuestion && !lastQuestion.answer) {
-      return res.status(400).json({
-        message:
-          "Debes esperar la respuesta del vendedor antes de enviar otra pregunta",
-      });
-    }
-
-    const newQuestion = new Question({
-      vehicle: vehicleId,
-      question,
-      askedBy: req.user.id,
+      askedBy: req.user._id,
+      answer: null,
     });
 
-    await newQuestion.save();
+    if (pendingQuestion) {
+      return res.status(400).json({
+        message: "Debes esperar a que el dueño responda tu pregunta anterior",
+      });
+    }
+
+    const newQuestion = await Question.create({
+      vehicle: vehicleId,
+      question,
+      askedBy: req.user._id,
+    });
 
     res.status(201).json({
       message: "Pregunta enviada correctamente",
       data: newQuestion,
     });
   } catch (error) {
-    res.status(500).json({
-      message: "Error al enviar la pregunta",
-      error: error.message,
-    });
+    res.status(500).json({ message: "Error al enviar pregunta", error: error.message });
   }
 };
 
@@ -95,7 +81,10 @@ exports.answerQuestion = async (req, res) => {
       });
     }
 
-    const question = await Question.findById(id).populate("vehicle");
+    const question = await Question.findById(id).populate({
+      path: "vehicle",
+      select: "title brand model user",
+    });
 
     if (!question) {
       return res.status(404).json({
@@ -103,31 +92,42 @@ exports.answerQuestion = async (req, res) => {
       });
     }
 
-    // Solo el propietario puede responder
+    if (!question.vehicle) {
+      return res.status(404).json({
+        message: "Vehículo asociado no encontrado",
+      });
+    }
+
+    if (!question.vehicle.user) {
+      return res.status(400).json({
+        message: "El vehículo no tiene propietario asociado",
+      });
+    }
+
     if (question.vehicle.user.toString() !== req.user.id) {
       return res.status(403).json({
         message: "No autorizado para responder",
       });
     }
 
-    // Evitar responder dos veces
     if (question.answer) {
       return res.status(400).json({
         message: "Esta pregunta ya fue respondida",
       });
     }
 
-    question.answer = answer;
+    question.answer = answer.trim();
     question.answeredBy = req.user.id;
     question.answerDate = new Date();
 
     await question.save();
 
-    res.json({
+    res.status(200).json({
       message: "Respuesta enviada correctamente",
       data: question,
     });
   } catch (error) {
+    console.error("Error en answerQuestion:", error);
     res.status(500).json({
       message: "Error al responder la pregunta",
       error: error.message,
@@ -140,8 +140,15 @@ exports.getMyQuestions = async (req, res) => {
     const questions = await Question.find({
       askedBy: req.user.id,
     })
-      .populate("vehicle")
-      .populate("answeredBy", "name");
+      .populate({
+        path: "vehicle",
+        select: "title brand model user",
+        populate: {
+          path: "user",
+          select: "_id name lastName",
+        },
+      })
+      .populate("answeredBy", "name lastName");
 
     res.json({
       data: questions,
@@ -158,16 +165,64 @@ exports.getVehicleQuestions = async (req, res) => {
   try {
     const { vehicleId } = req.params;
 
-    const questions = await Question.find({vehicle: vehicleId,})
+    const questions = await Question.find({
+      vehicle: vehicleId,
+    })
       .populate("askedBy", "name lastName profileImage")
       .populate("answeredBy", "name lastName profileImage")
+      .populate({
+        path: "vehicle",
+        select: "title brand model user",
+        populate: {
+          path: "user",
+          select: "_id name lastName",
+        },
+      })
       .sort({ questionDate: 1 });
 
-    res.json({data: questions,});
-
+    res.json({
+      data: questions,
+    });
   } catch (error) {
     res.status(500).json({
       message: "Error al obtener las preguntas del vehículo",
+      error: error.message,
+    });
+  }
+};
+
+exports.deleteConversation = async (req, res) => {
+  try {
+    const { vehicleId, askedById } = req.params;
+
+    const vehicle = await Vehicle.findById(vehicleId);
+
+    if (!vehicle) {
+      return res.status(404).json({
+        message: "Vehículo no encontrado",
+      });
+    }
+
+    const isOwner = vehicle.user.toString() === req.user.id;
+    const isAsker = askedById === req.user.id;
+
+    if (!isOwner && !isAsker) {
+      return res.status(403).json({
+        message: "No autorizado para eliminar esta conversación",
+      });
+    }
+
+    await Question.deleteMany({
+      vehicle: vehicleId,
+      askedBy: askedById,
+    });
+
+    res.json({
+      message: "Conversación eliminada correctamente",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error al eliminar la conversación",
       error: error.message,
     });
   }

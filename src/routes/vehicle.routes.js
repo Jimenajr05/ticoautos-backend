@@ -40,3 +40,4 @@ router.patch("/:id/sold", authMiddleware, vehicleController.markAsSold);
 router.get("/:id/share", vehicleController.getVehicleShareLink);
 
 module.exports = router;
+
