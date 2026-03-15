@@ -59,6 +59,31 @@ exports.askQuestion = async (req, res) => {
   }
 };
 
+exports.getQuestionsForMyVehicles = async (req, res) => {
+  try {
+    const myVehicles = await Vehicle.find({ user: req.user.id }).select("_id");
+
+    const vehicleIds = myVehicles.map((vehicle) => vehicle._id);
+
+    const questions = await Question.find({
+      vehicle: { $in: vehicleIds },
+    })
+      .populate({path: "vehicle",select: "title brand model user", populate: {path: "user",select: "_id name lastName",},})
+      .populate("askedBy", "name lastName")
+      .populate("answeredBy", "name lastName")
+      .sort({ questionDate: -1 });
+
+    res.json({
+      data: questions,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error al obtener preguntas de mis vehículos",
+      error: error.message,
+    });
+  }
+};
+
 exports.answerQuestion = async (req, res) => {
   try {
     const { id } = req.params;
@@ -139,7 +164,7 @@ exports.getVehicleQuestions = async (req, res) => {
       .sort({ questionDate: 1 });
 
     res.json({data: questions,});
-    
+
   } catch (error) {
     res.status(500).json({
       message: "Error al obtener las preguntas del vehículo",
