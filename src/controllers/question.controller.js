@@ -133,16 +133,13 @@ exports.getVehicleQuestions = async (req, res) => {
   try {
     const { vehicleId } = req.params;
 
-    const questions = await Question.find({
-      vehicle: vehicleId,
-    })
+    const questions = await Question.find({vehicle: vehicleId,})
       .populate("askedBy", "name lastName profileImage")
       .populate("answeredBy", "name lastName profileImage")
       .sort({ questionDate: 1 });
 
-    res.json({
-      data: questions,
-    });
+    res.json({data: questions,});
+    
   } catch (error) {
     res.status(500).json({
       message: "Error al obtener las preguntas del vehículo",
