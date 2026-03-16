@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 
+// Define el esquema de las preguntas
 const questionSchema = new mongoose.Schema(
   {
     vehicle: {

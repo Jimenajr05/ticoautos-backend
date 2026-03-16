@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 
+// Define el esquema de la respuesta
 const answerSchema = new mongoose.Schema(
   {
     answer: {
