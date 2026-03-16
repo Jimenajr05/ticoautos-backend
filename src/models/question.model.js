@@ -1,38 +1,45 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const questionSchema = new mongoose.Schema({
-  vehicle: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Vehicle',
-    required: true
+// Define el esquema de las preguntas
+const questionSchema = new mongoose.Schema(
+  {
+    vehicle: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Vehicle",
+      required: true,
+    },
+    question: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    answer: {
+      type: String,
+      default: null,
+      trim: true,
+    },
+    askedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    answeredBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+    questionDate: {
+      type: Date,
+      default: Date.now,
+    },
+    answerDate: {
+      type: Date,
+      default: null,
+    },
   },
-  question: {
-    type: String,
-    required: true
-  },
-  answer: {
-    type: String,
-    default: null
-  },
-  askedBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  },
-  answeredBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    default: null
-  },
-  questionDate: {
-    type: Date,
-    default: Date.now
-  },
-  answerDate: {
-    type: Date
+  {
+    timestamps: true,
   }
-});
+);
 
-module.exports = mongoose.model('Question', questionSchema);
-
-
+module.exports = mongoose.model("Question", questionSchema);
