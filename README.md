@@ -22,13 +22,13 @@ Este backend está desarrollado con **Node.js, Express y MongoDB**, e implementa
 
 Durante el desarrollo del backend se instalaron las siguientes dependencias:
 
-npm install express
-npm install mongoose
-npm install dotenv
-npm install bcrypt
-npm install jsonwebtoken
-npm install cors
-npm install multer
+- npm install express
+- npm install mongoose
+- npm install dotenv
+- npm install bcrypt
+- npm install jsonwebtoken
+- npm install cors
+- npm install multer
 
 ---
 
@@ -353,5 +353,5 @@ PORT=3000
 
 # Autoras
 
-María Paz Ugalde Araya
-María Jimena Jara Rojas
+- María Paz Ugalde Araya
+- María Jimena Jara Rojas
