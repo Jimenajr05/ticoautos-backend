@@ -1,4 +1,4 @@
-esto no lo voy a decargar npm install -D nodemon entonces queda asi? # TicoAutos Backend
+# TicoAutos Backend
 
 Backend del sistema **TicoAutos**, una plataforma para la publicación y gestión de vehículos en venta donde los usuarios pueden registrarse, publicar vehículos y comunicarse con otros usuarios mediante preguntas y respuestas.
 
