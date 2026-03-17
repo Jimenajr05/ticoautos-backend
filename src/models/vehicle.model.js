@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 
+// Define el esquema de los vehículos
 const vehicleSchema = new mongoose.Schema(
   {
     title: {
@@ -32,12 +33,14 @@ const vehicleSchema = new mongoose.Schema(
       type: String,
     },
 
+    // Estado del vehículo (disponible o vendido)
     status: {
       type: String,
       enum: ["available", "sold"],
       default: "available",
     },
 
+    // Arreglo de imágenes del vehículo
     vehicleImage: {
       type: [String],
       default: []
@@ -45,7 +48,7 @@ const vehicleSchema = new mongoose.Schema(
 
     user: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",       //La relacion que va a tener con el usuario
+      ref: "User", //La relacion que va a tener con el usuario
       required: true,
     },
   },
